@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  transactions Transaction[]
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  author    String
+  isbn      String?  @unique
+  copies    Int      @default(1)
+  createdAt DateTime @default(now())
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  type      TransactionType
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  date      DateTime
+}
+
+enum Role {
+  ADMIN
+  LIBRARIAN
+  MEMBER
+}
+
+enum TransactionType {
+  CHECKOUT
+  CHECKIN
+  RESERVE
+}
